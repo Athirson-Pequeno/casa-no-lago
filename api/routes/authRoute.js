@@ -11,24 +11,24 @@ router.post('/register', async (req, res) => {
     const { name, email, password, confirmpassword, telefone, cpf } = req.body
 
     // validação
-    if (!name)                        return res.status(422).json({ msg: 'O nome é obrigatorio!' })
-    if (!email)                       return res.status(422).json({ msg: 'O email é obrigatorio!' })
-    if (!password)                    return res.status(422).json({ msg: 'A senha é obrigatorio!' })
+    if (!name) return res.status(422).json({ msg: 'O nome é obrigatorio!' })
+    if (!email) return res.status(422).json({ msg: 'O email é obrigatorio!' })
+    if (!password) return res.status(422).json({ msg: 'A senha é obrigatorio!' })
     if (password !== confirmpassword) return res.status(422).json({ msg: 'As senhas não conferem!' })
-    if (!telefone)                    return res.status(422).json({ msg: 'O telefone é obrigatorio!' })
-    if (!cpf)                         return res.status(422).json({ msg: 'O CPF é obrigatorio!' })
-        
-    
+    if (!telefone) return res.status(422).json({ msg: 'O telefone é obrigatorio!' })
+    if (!cpf) return res.status(422).json({ msg: 'O CPF é obrigatorio!' })
+
+
     //check if user exists
     const userExists = await User.findOne({ email })
     if (userExists) return res.status(422).json({ msg: 'Por favor, utilize outro e-mail!' })
 
-    
+
     // Criar senha
     const salt = await bcrypt.genSalt(12)
     const passwordHash = await bcrypt.hash(password, salt)
 
- try {
+    try {
         // cria o cliente automaticamente com os dados pessoais
         const cliente = await Cliente.create({
             nome: name,
@@ -42,7 +42,7 @@ router.post('/register', async (req, res) => {
             name,
             email,
             password: passwordHash,
-            clienteId: cliente._id  
+            clienteId: cliente._id
         })
 
         await user.save()
@@ -60,7 +60,7 @@ router.post('/login', async (req, res) => {
     const { email, password } = req.body
 
     // validações
-    if (!email)    return res.status(422).json({ msg: 'O email é obrigatorio!' })
+    if (!email) return res.status(422).json({ msg: 'O email é obrigatorio!' })
     if (!password) return res.status(422).json({ msg: 'A senha é obrigatorio!' })
 
     // checar se o usuario existe
