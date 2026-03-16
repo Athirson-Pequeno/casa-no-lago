@@ -3,18 +3,21 @@ const router = express.Router()
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const User = require('../models/userModel')
+const Cliente = require('../models/clienteModel')
 
 // ---- REGISTRO ----
 
 router.post('/register', async (req, res) => {
-    const { name, email, password, confirmpassword } = req.body
+    const { name, email, password, confirmpassword, telefone, cpf } = req.body
 
     // validação
     if (!name)                        return res.status(422).json({ msg: 'O nome é obrigatorio!' })
     if (!email)                       return res.status(422).json({ msg: 'O email é obrigatorio!' })
     if (!password)                    return res.status(422).json({ msg: 'A senha é obrigatorio!' })
     if (password !== confirmpassword) return res.status(422).json({ msg: 'As senhas não conferem!' })
-
+    if (!telefone)                    return res.status(422).json({ msg: 'O telefone é obrigatorio!' })
+    if (!cpf)                         return res.status(422).json({ msg: 'O CPF é obrigatorio!' })
+        
     
     //check if user exists
     const userExists = await User.findOne({ email })
@@ -25,18 +28,31 @@ router.post('/register', async (req, res) => {
     const salt = await bcrypt.genSalt(12)
     const passwordHash = await bcrypt.hash(password, salt)
 
-    // criar usuario
-    const user = new User({ name, email, password: passwordHash })
+ try {
+        // cria o cliente automaticamente com os dados pessoais
+        const cliente = await Cliente.create({
+            nome: name,
+            email,
+            telefone,
+            cpf,
+        })
 
-    try {
+        // cria o user já vinculado ao cliente criado acima
+        const user = new User({
+            name,
+            email,
+            password: passwordHash,
+            clienteId: cliente._id  
+        })
+
         await user.save()
         res.status(201).json({ msg: 'Usuario criado com sucesso.' })
+
     } catch (error) {
         console.log(error)
         res.status(500).json({ msg: 'Erro no servidor, tente novamente mais tarde!' })
     }
 })
-
 
 // ---- LOGIN ----
 
@@ -57,7 +73,7 @@ router.post('/login', async (req, res) => {
 
     try {
         const secret = process.env.SECRET
-        const token = jwt.sign({ id: user._id }, secret)
+        const token = jwt.sign({ id: user._id }, secret, { expiresIn: '15m' })
         res.status(200).json({ msg: 'Autenticação realizada com sucesso', token })
     } catch (err) {
         console.log(err)
