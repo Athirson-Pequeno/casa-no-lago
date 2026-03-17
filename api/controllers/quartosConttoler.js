@@ -7,7 +7,7 @@ const criarQuarto = async (req, res) => {
         const quarto = await Quarto.create({ titulo, fotos, valorDiaria });
         res.status(201).json(quarto);
     } catch (error) {
-        res.status(400).json({ erro: error.message });
+        res.status(400).json({ erro: "Não foi possível criar o quarto. Verifique os dados enviados." });
     }
 };
 
@@ -17,7 +17,7 @@ const listarQuartos = async (req, res) => {
         const quartos = await Quarto.find().populate("reservas");
         res.json(quartos);
     } catch (error) {
-        res.status(500).json({ erro: error.message });
+        res.status(500).json({ erro: "Erro ao buscar quartos." });
     }
 };
 
@@ -25,10 +25,10 @@ const listarQuartos = async (req, res) => {
 const buscarQuarto = async (req, res) => {
     try {
         const quarto = await Quarto.findById(req.params.id).populate("reservas");
-        if (!quarto) return res.status(404).json({ erro: "Quarto não encontrado" });
+        if (!quarto) return res.status(404).json({ erro: "Quarto não encontrado." });
         res.json(quarto);
     } catch (error) {
-        res.status(500).json({ erro: error.message });
+        res.status(500).json({ erro: "Erro ao buscar quarto." });
     }
 };
 
@@ -36,10 +36,10 @@ const buscarQuarto = async (req, res) => {
 const atualizarQuarto = async (req, res) => {
     try {
         const quarto = await Quarto.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
-        if (!quarto) return res.status(404).json({ erro: "Quarto não encontrado" });
+        if (!quarto) return res.status(404).json({ erro: "Quarto não encontrado." });
         res.json(quarto);
     } catch (error) {
-        res.status(400).json({ erro: error.message });
+        res.status(400).json({ erro: "Não foi possível atualizar o quarto. Verifique os dados enviados." });
     }
 };
 
@@ -47,10 +47,10 @@ const atualizarQuarto = async (req, res) => {
 const deletarQuarto = async (req, res) => {
     try {
         const quarto = await Quarto.findByIdAndDelete(req.params.id);
-        if (!quarto) return res.status(404).json({ erro: "Quarto não encontrado" });
-        res.json({ mensagem: "Quarto deletado com sucesso" });
+        if (!quarto) return res.status(404).json({ erro: "Quarto não encontrado." });
+        res.json({ mensagem: "Quarto deletado com sucesso." });
     } catch (error) {
-        res.status(500).json({ erro: error.message });
+        res.status(500).json({ erro: "Erro ao deletar quarto." });
     }
 };
 

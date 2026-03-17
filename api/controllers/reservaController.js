@@ -1,12 +1,12 @@
-const Reserva  = require("../models/reservaModel");
-const Cliente  = require("../models/clienteModel");
-const Quarto   = require("../models/quartosModel");
-const User     = require("../models/userModel");
+const Reserva = require("../models/reservaModel");
+const Cliente = require("../models/clienteModel");
+const Quarto = require("../models/quartosModel");
+const User = require("../models/userModel");
 
 // Criar reserva
 const criarReserva = async (req, res) => {
     try {
-        const { quartoId, diaria } = req.body; 
+        const { quartoId, diaria } = req.body;
 
         // busca o user logado para pegar o clienteId automaticamente
         const user = await User.findById(req.userId);
@@ -24,7 +24,7 @@ const criarReserva = async (req, res) => {
 
         // Gera lista de datas do período alugado
         const inicio = new Date(diaria.dataInicio);
-        const fim    = new Date(diaria.dataFim);
+        const fim = new Date(diaria.dataFim);
         const datasDoAluguel = [];
         for (let d = new Date(inicio); d <= fim; d.setDate(d.getDate() + 1)) {
             datasDoAluguel.push(new Date(d));
@@ -39,21 +39,21 @@ const criarReserva = async (req, res) => {
         if (conflito) return res.status(409).json({ erro: "Quarto já alugado nesse período" });
 
         const reserva = await Reserva.create({
-            userId:  req.userId,
-            cliente: clienteId, 
-            quarto:  quartoId,
+            userId: req.userId,
+            cliente: clienteId,
+            quarto: quartoId,
             diaria
         });
 
         await Cliente.findByIdAndUpdate(clienteId, { $push: { reservas: reserva._id } });
         await Quarto.findByIdAndUpdate(quartoId, {
             $push: { reservas: reserva._id, diasAlugados: { $each: datasDoAluguel } },
-            $set:  { estaAlugado: true }
+            $set: { estaAlugado: true }
         });
 
         res.status(201).json(reserva);
     } catch (error) {
-        res.status(400).json({ erro: error.message });
+        res.status(400).json({ erro: "Não foi possível criar a reserva. Verifique os dados enviados." });
     }
 };
 
@@ -68,7 +68,7 @@ const listarReservas = async (req, res) => {
             .populate("quarto")
         res.json(reservas)
     } catch (error) {
-        res.status(500).json({ erro: error.message })
+        res.status(500).json({ erro: "Erro ao buscar reservas." })
     }
 }
 
@@ -87,7 +87,7 @@ const buscarReserva = async (req, res) => {
 
         res.json(reserva);
     } catch (error) {
-        res.status(500).json({ erro: error.message });
+        res.status(500).json({ erro: "Erro ao buscar reserva." });
     }
 };
 
@@ -107,11 +107,11 @@ const deletarReserva = async (req, res) => {
 
         await Reserva.findByIdAndDelete(req.params.id);
         await Cliente.findByIdAndUpdate(reserva.cliente, { $pull: { reservas: reserva._id } });
-        await Quarto.findByIdAndUpdate(reserva.quarto,   { $pull: { reservas: reserva._id } });
+        await Quarto.findByIdAndUpdate(reserva.quarto, { $pull: { reservas: reserva._id } });
 
         res.json({ mensagem: "Reserva deletada com sucesso" });
     } catch (error) {
-        res.status(500).json({ erro: error.message });
+        res.status(500).json({ erro: "Erro ao deletar reserva." });
     }
 };
 module.exports = { criarReserva, listarReservas, buscarReserva, deletarReserva };

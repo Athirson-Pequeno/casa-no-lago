@@ -6,7 +6,7 @@ const { criarCliente, listarClientes, buscarCliente, atualizarCliente, deletarCl
 router.post("/", criarCliente);
 router.get("/", checkToken, listarClientes);
 router.get("/:id", checkToken, buscarCliente);
-router.put("/:id", atualizarCliente);
+router.put("/:id", checkToken, atualizarCliente);
 router.delete("/:id", checkToken, deletarCliente);
 
 module.exports = router;
