@@ -35,7 +35,13 @@ const buscarQuarto = async (req, res) => {
 // Atualizar quarto
 const atualizarQuarto = async (req, res) => {
     try {
-        const quarto = await Quarto.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+        const { titulo, fotos, valorDiaria } = req.body;
+        const camposPermitidos = {};
+        if (titulo !== undefined) camposPermitidos.titulo = titulo;
+        if (fotos !== undefined) camposPermitidos.fotos = fotos;
+        if (valorDiaria !== undefined) camposPermitidos.valorDiaria = valorDiaria;
+
+        const quarto = await Quarto.findByIdAndUpdate(req.params.id, camposPermitidos, { new: true, runValidators: true });
         if (!quarto) return res.status(404).json({ erro: "Quarto não encontrado." });
         res.json(quarto);
     } catch (error) {
