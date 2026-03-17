@@ -7,6 +7,7 @@ const clienteRoute = require("./routes/clienteRoute");
 const quartosRoute = require("./routes/quartosRoute");
 const reservaRoute = require("./routes/reservaRoute");
 const authRoute = require("./routes/authRoute");   // Parte Pedro
+const tagRoute = require("./routes/tagRoute");
 
 const app = express();
 
@@ -16,6 +17,7 @@ app.use("/clientes", clienteRoute);
 app.use("/quartos", quartosRoute);
 app.use("/reservas", reservaRoute);
 app.use("/auth", authRoute);           // Parte Pedro
+app.use("/tags", tagRoute);
 
 app.listen(3000, () => {
     console.log("Servidor rodando na porta 3000");
