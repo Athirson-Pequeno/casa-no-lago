@@ -22,9 +22,18 @@ const criarReserva = async (req, res) => {
         const quarto = await Quarto.findById(quartoId);
         if (!quarto) return res.status(404).json({ erro: "Quarto não encontrado" });
 
-        // Gera lista de datas do período alugado
         const inicio = new Date(diaria.dataInicio);
         const fim = new Date(diaria.dataFim);
+
+        const hoje = new Date();
+        hoje.setHours(0, 0, 0, 0);
+
+        if (inicio < hoje) {
+            return res.status(400).json({ erro: "A data de início não pode ser no passado." });
+        }
+        if (fim < inicio) {
+            return res.status(400).json({ erro: "A data de fim não pode ser anterior à data de início." });
+        }
         const datasDoAluguel = [];
         for (let d = new Date(inicio); d <= fim; d.setDate(d.getDate() + 1)) {
             datasDoAluguel.push(new Date(d));
@@ -38,11 +47,19 @@ const criarReserva = async (req, res) => {
         );
         if (conflito) return res.status(409).json({ erro: "Quarto já alugado nesse período" });
 
+        const datasUnicas = [...new Set(datasDoAluguel.map(d => d.toDateString()))];
+        const numeroDiarias = datasUnicas.length;
+        const valorCalculado = numeroDiarias * quarto.valorDiaria;
+
         const reserva = await Reserva.create({
             userId: req.userId,
             cliente: clienteId,
             quarto: quartoId,
-            diaria
+            diaria: {
+                dataInicio: diaria.dataInicio,
+                dataFim: diaria.dataFim,
+                valor: valorCalculado
+            }
         });
 
         await Cliente.findByIdAndUpdate(clienteId, { $push: { reservas: reserva._id } });
