@@ -94,7 +94,7 @@ const listarReservas = async (req, res) => {
         const filtro = user.role === 'admin' ? {} : { userId: req.userId };
 
         const reservas = await Reserva.find(filtro)
-            .populate("cliente")
+            .populate({ path: "cliente", populate: { path: "user", select: "name email" } })
             .populate("quarto");
         res.json(reservas);
     } catch (error) {
@@ -106,7 +106,7 @@ const listarReservas = async (req, res) => {
 const buscarReserva = async (req, res) => {
     try {
         const reserva = await Reserva.findById(req.params.id)
-            .populate("cliente")
+            .populate({ path: "cliente", populate: { path: "user", select: "name email" } })
             .populate("quarto");
 
         if (!reserva) return res.status(404).json({ erro: "Reserva não encontrada." });
@@ -160,69 +160,3 @@ const deletarReserva = async (req, res) => {
 };
 
 module.exports = { criarReserva, listarReservas, buscarReserva, deletarReserva };
-
-/*
-com o admin podendo criar reserva tambem
-
-const criarReserva = async (req, res) => {
-    try {
-        const { quartoId, diaria, clienteId: clienteIdBody } = req.body
-
-        // busca o usuário logado
-        const user = await User.findById(req.userId)
-
-        let clienteId
-
-        if (user.role === 'admin') {
-            // admin passa o clienteId no body
-            if (!clienteIdBody) {
-                return res.status(400).json({ erro: "Admin deve informar o clienteId no body" })
-            }
-            clienteId = clienteIdBody
-        } else {
-            // cliente pega o clienteId automaticamente do seu perfil
-            if (!user.clienteId) {
-                return res.status(400).json({ erro: "Usuário não tem perfil de cliente vinculado" })
-            }
-            clienteId = user.clienteId
-        }
-
-        const cliente = await Cliente.findById(clienteId)
-        if (!cliente) return res.status(404).json({ erro: "Cliente não encontrado" })
-
-        const quarto = await Quarto.findById(quartoId)
-        if (!quarto) return res.status(404).json({ erro: "Quarto não encontrado" })
-
-        const inicio = new Date(diaria.dataInicio)
-        const fim    = new Date(diaria.dataFim)
-        const datasDoAluguel = []
-        for (let d = new Date(inicio); d <= fim; d.setDate(d.getDate() + 1)) {
-            datasDoAluguel.push(new Date(d))
-        }
-
-        const conflito = quarto.diasAlugados.some(dAlugada =>
-            datasDoAluguel.some(dNova =>
-                dAlugada.toDateString() === dNova.toDateString()
-            )
-        )
-        if (conflito) return res.status(409).json({ erro: "Quarto já alugado nesse período" })
-
-        const reserva = await Reserva.create({
-            userId:  req.userId,
-            cliente: clienteId,
-            quarto:  quartoId,
-            diaria
-        })
-
-        await Cliente.findByIdAndUpdate(clienteId, { $push: { reservas: reserva._id } })
-        await Quarto.findByIdAndUpdate(quartoId, {
-            $push: { reservas: reserva._id, diasAlugados: { $each: datasDoAluguel } },
-            $set:  { estaAlugado: true }
-        })
-
-        res.status(201).json(reserva)
-    } catch (error) {
-        res.status(400).json({ erro: error.message })
-    }
-}
-*/
