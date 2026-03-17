@@ -8,23 +8,33 @@ const criarReserva = async (req, res) => {
     try {
         const { quartoId, diaria } = req.body;
 
+        // valida presença dos campos obrigatórios
+        if (!quartoId) return res.status(400).json({ erro: "O campo quartoId é obrigatório." });
+        if (!diaria?.dataInicio) return res.status(400).json({ erro: "O campo diaria.dataInicio é obrigatório." });
+        if (!diaria?.dataFim) return res.status(400).json({ erro: "O campo diaria.dataFim é obrigatório." });
+
         // busca o user logado para pegar o clienteId automaticamente
         const user = await User.findById(req.userId);
         if (!user || !user.clienteId) {
-            return res.status(400).json({ erro: "Usuário não tem perfil de cliente vinculado" });
+            return res.status(400).json({ erro: "Usuário não tem perfil de cliente vinculado." });
         }
 
-        const clienteId = user.clienteId; // pega automaticamente do user logado
+        const clienteId = user.clienteId;
 
         const cliente = await Cliente.findById(clienteId);
-        if (!cliente) return res.status(404).json({ erro: "Cliente não encontrado" });
+        if (!cliente) return res.status(404).json({ erro: "Cliente não encontrado." });
 
         const quarto = await Quarto.findById(quartoId);
-        if (!quarto) return res.status(404).json({ erro: "Quarto não encontrado" });
+        if (!quarto) return res.status(404).json({ erro: "Quarto não encontrado." });
 
+        // valida se as datas são datas reais
         const inicio = new Date(diaria.dataInicio);
         const fim = new Date(diaria.dataFim);
 
+        if (isNaN(inicio.getTime())) return res.status(400).json({ erro: "Data de início inválida." });
+        if (isNaN(fim.getTime())) return res.status(400).json({ erro: "Data de fim inválida." });
+
+        // valida que as datas fazem sentido
         const hoje = new Date();
         hoje.setHours(0, 0, 0, 0);
 
@@ -34,19 +44,22 @@ const criarReserva = async (req, res) => {
         if (fim < inicio) {
             return res.status(400).json({ erro: "A data de fim não pode ser anterior à data de início." });
         }
+
+        // gera lista de datas do período alugado
         const datasDoAluguel = [];
         for (let d = new Date(inicio); d <= fim; d.setDate(d.getDate() + 1)) {
             datasDoAluguel.push(new Date(d));
         }
 
-        // Verifica conflito com dias já alugados
+        // verifica conflito com dias já alugados
         const conflito = quarto.diasAlugados.some(dAlugada =>
             datasDoAluguel.some(dNova =>
                 dAlugada.toDateString() === dNova.toDateString()
             )
         );
-        if (conflito) return res.status(409).json({ erro: "Quarto já alugado nesse período" });
+        if (conflito) return res.status(409).json({ erro: "Quarto já alugado nesse período." });
 
+        // calcula o valor total com base no valorDiaria do quarto (não aceita valor do body)
         const datasUnicas = [...new Set(datasDoAluguel.map(d => d.toDateString()))];
         const numeroDiarias = datasUnicas.length;
         const valorCalculado = numeroDiarias * quarto.valorDiaria;
@@ -74,31 +87,33 @@ const criarReserva = async (req, res) => {
     }
 };
 
-// Listar reservas 
+// Listar reservas
 const listarReservas = async (req, res) => {
     try {
-        const user = await User.findById(req.userId)
-        const filtro = user.role === 'admin' ? {} : { userId: req.userId }
+        const user = await User.findById(req.userId);
+        const filtro = user.role === 'admin' ? {} : { userId: req.userId };
 
         const reservas = await Reserva.find(filtro)
             .populate("cliente")
-            .populate("quarto")
-        res.json(reservas)
+            .populate("quarto");
+        res.json(reservas);
     } catch (error) {
-        res.status(500).json({ erro: "Erro ao buscar reservas." })
+        res.status(500).json({ erro: "Erro ao buscar reservas." });
     }
-}
+};
 
-// Buscar reserva por ID 
+// Buscar reserva por ID
 const buscarReserva = async (req, res) => {
     try {
         const reserva = await Reserva.findById(req.params.id)
             .populate("cliente")
             .populate("quarto");
 
-        if (!reserva) return res.status(404).json({ erro: "Reserva não encontrada" });
+        if (!reserva) return res.status(404).json({ erro: "Reserva não encontrada." });
 
-        if (reserva.userId.toString() !== req.userId) {
+        // admin pode buscar qualquer reserva, cliente só a sua
+        const user = await User.findById(req.userId);
+        if (user.role !== 'admin' && reserva.userId.toString() !== req.userId) {
             return res.status(403).json({ erro: "Acesso negado! Esta reserva não é sua." });
         }
 
@@ -112,29 +127,39 @@ const buscarReserva = async (req, res) => {
 const deletarReserva = async (req, res) => {
     try {
         const reserva = await Reserva.findById(req.params.id);
-        if (!reserva) return res.status(404).json({ erro: "Reserva não encontrada" });
+        if (!reserva) return res.status(404).json({ erro: "Reserva não encontrada." });
 
-        // busca o usuário logado para verificar o role
-        const user = await User.findById(req.userId);
-
-        // admin pode deletar qualquer reserva, cliente só a sua
-        if (user.role !== 'admin' && reserva.userId.toString() !== req.userId) {
-            return res.status(403).json({ erro: "Acesso negado! Esta reserva não é sua." });
+        // recalcula as datas que essa reserva ocupava para removê-las de diasAlugados
+        const inicio = new Date(reserva.diaria.dataInicio);
+        const fim = new Date(reserva.diaria.dataFim);
+        const datasDaReserva = [];
+        for (let d = new Date(inicio); d <= fim; d.setDate(d.getDate() + 1)) {
+            datasDaReserva.push(new Date(d));
         }
 
         await Reserva.findByIdAndDelete(req.params.id);
         await Cliente.findByIdAndUpdate(reserva.cliente, { $pull: { reservas: reserva._id } });
-        await Quarto.findByIdAndUpdate(reserva.quarto, { $pull: { reservas: reserva._id } });
 
-        res.json({ mensagem: "Reserva deletada com sucesso" });
+        // remove as datas ocupadas e a referência da reserva no quarto
+        const quarto = await Quarto.findById(reserva.quarto);
+        const datasStrings = datasDaReserva.map(d => d.toDateString());
+        const diasRestantes = quarto.diasAlugados.filter(d => !datasStrings.includes(d.toDateString()));
+
+        await Quarto.findByIdAndUpdate(reserva.quarto, {
+            $pull: { reservas: reserva._id },
+            $set: {
+                diasAlugados: diasRestantes,
+                estaAlugado: diasRestantes.length > 0
+            }
+        });
+
+        res.json({ mensagem: "Reserva deletada com sucesso." });
     } catch (error) {
         res.status(500).json({ erro: "Erro ao deletar reserva." });
     }
 };
+
 module.exports = { criarReserva, listarReservas, buscarReserva, deletarReserva };
-
-
-
 
 /*
 com o admin podendo criar reserva tambem

@@ -36,16 +36,24 @@ const buscarCliente = async (req, res) => {
 // Atualizar cliente
 const atualizarCliente = async (req, res) => {
     try {
+        // busca o user logado para pegar o clienteId vinculado
         const user = await User.findById(req.userId);
         if (!user || !user.clienteId) {
             return res.status(400).json({ erro: "Usuário não tem perfil de cliente vinculado." });
         }
 
+        // garante que o cliente do :id é o mesmo do usuário logado
         if (user.clienteId.toString() !== req.params.id) {
             return res.status(403).json({ erro: "Acesso negado! Você só pode atualizar seus próprios dados." });
         }
 
-        const cliente = await Cliente.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+        const { nome, email, telefone } = req.body;
+        const camposPermitidos = {};
+        if (nome) camposPermitidos.nome = nome;
+        if (email) camposPermitidos.email = email;
+        if (telefone) camposPermitidos.telefone = telefone;
+
+        const cliente = await Cliente.findByIdAndUpdate(req.params.id, camposPermitidos, { new: true, runValidators: true });
         if (!cliente) return res.status(404).json({ erro: "Cliente não encontrado." });
         res.json(cliente);
     } catch (error) {
