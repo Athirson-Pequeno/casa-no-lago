@@ -13,10 +13,31 @@ router.post('/register', async (req, res) => {
     // validação
     if (!name) return res.status(422).json({ msg: 'O nome é obrigatorio!' })
     if (!email) return res.status(422).json({ msg: 'O email é obrigatorio!' })
+        // Validação: formato de e-mail
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+        if (!emailRegex.test(email)) {
+            return res.status(422).json({ msg: 'E-mail inválido! Use o formato exemplo@email.com.' })
+        }
+
     if (!password) return res.status(422).json({ msg: 'A senha é obrigatorio!' })
     if (password !== confirmpassword) return res.status(422).json({ msg: 'As senhas não conferem!' })
+    
     if (!telefone) return res.status(422).json({ msg: 'O telefone é obrigatorio!' })
+
+        // Validação: apenas 11 dígitos numéricos
+        const telefoneRegex = /^\d{11}$/
+        if (!telefoneRegex.test(telefone)) {
+            return res.status(422).json({ msg: 'Telefone inválido! Digite apenas os 11 números, incluindo o ddd.' })
+        }
+
+        
     if (!cpf) return res.status(422).json({ msg: 'O CPF é obrigatorio!' })
+
+        // Validação: apenas 11 dígitos numéricos
+        const cpfRegex = /^\d{11}$/
+        if (!cpfRegex.test(cpf)) {
+            return res.status(422).json({ msg: 'CPF inválido! Digite apenas os 11 números, sem pontos ou traços.' })
+        }
 
     // check if user exists
     const userExists = await User.findOne({ email })
