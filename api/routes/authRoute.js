@@ -43,7 +43,7 @@ router.post('/register', async (req, res) => {
 
         // vincula o clienteId de volta no User
         user.clienteId = cliente._id
-        await user.save()
+        await User.updateOne({ _id: user._id }, { clienteId: cliente._id })
 
         res.status(201).json({ msg: 'Usuario criado com sucesso.' })
 
