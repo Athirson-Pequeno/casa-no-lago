@@ -26,8 +26,7 @@ const buscarCliente = async (req, res) => {
     }
 };
 
-// Atualizar cliente — apenas o próprio usuário logado pode atualizar seus dados
-// telefone fica no Cliente, email fica no User — ambos atualizados aqui
+// Atualizar cliente
 const atualizarCliente = async (req, res) => {
     try {
         const user = await User.findById(req.userId);
