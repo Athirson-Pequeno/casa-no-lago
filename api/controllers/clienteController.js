@@ -65,9 +65,19 @@ const atualizarCliente = async (req, res) => {
 // Deletar cliente
 const deletarCliente = async (req, res) => {
     try {
-        const cliente = await Cliente.findByIdAndDelete(req.params.id);
+        const cliente = await Cliente.findById(req.params.id);
         if (!cliente) return res.status(404).json({ erro: "Cliente não encontrado." });
-        res.json({ mensagem: "Cliente deletado com sucesso." });
+
+        // Impede deleção se o cliente tiver reservas ativas
+        if (cliente.reservas.length > 0) {
+            return res.status(400).json({ erro: "Não é possível deletar um cliente com reservas ativas." });
+        }
+
+        // Deleta o Cliente e o User vinculado juntos
+        await Cliente.findByIdAndDelete(req.params.id);
+        await User.findByIdAndDelete(cliente.user);
+
+        res.json({ mensagem: "Cliente e usuário deletados com sucesso." });
     } catch (error) {
         res.status(500).json({ erro: "Erro ao deletar cliente." });
     }

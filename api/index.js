@@ -1,4 +1,4 @@
-require('dotenv').config()           // ← ADICIONE essa linha no topo
+require('dotenv').config()           
 const express = require("express");
 const bodyParser = require("body-parser");
 const db = require("./config/db.js");
