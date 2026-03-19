@@ -2,84 +2,53 @@ const Reserva = require("../models/reservaModel");
 const Cliente = require("../models/clienteModel");
 const Quarto = require("../models/quartosModel");
 const User = require("../models/userModel");
+const { gerarIntervalo, temConflito, contarDiarias } = require("../utils/datas");
+const { validarCamposReserva, validarDatas } = require("../utils/validacoes");
 
 // Criar reserva
 const criarReserva = async (req, res) => {
     try {
+        const erroValidacao = validarCamposReserva(req.body);
+        if (erroValidacao) return res.status(400).json({ erro: erroValidacao });
+
         const { quartoId, diaria } = req.body;
 
-        // valida presença dos campos obrigatórios
-        if (!quartoId) return res.status(400).json({ erro: "O campo quartoId é obrigatório." });
-        if (!diaria?.dataInicio) return res.status(400).json({ erro: "O campo diaria.dataInicio é obrigatório." });
-        if (!diaria?.dataFim) return res.status(400).json({ erro: "O campo diaria.dataFim é obrigatório." });
-
-        // busca o user logado para pegar o clienteId automaticamente
         const user = await User.findById(req.userId);
-        if (!user || !user.clienteId) {
+        if (!user?.clienteId)
             return res.status(400).json({ erro: "Usuário não tem perfil de cliente vinculado." });
-        }
 
-        const clienteId = user.clienteId;
-
-        const cliente = await Cliente.findById(clienteId);
+        const [cliente, quarto] = await Promise.all([
+            Cliente.findById(user.clienteId),
+            Quarto.findById(quartoId),
+        ]);
         if (!cliente) return res.status(404).json({ erro: "Cliente não encontrado." });
-
-        const quarto = await Quarto.findById(quartoId);
         if (!quarto) return res.status(404).json({ erro: "Quarto não encontrado." });
 
-        // valida se as datas são datas reais
-        const inicio = new Date(diaria.dataInicio);
-        const fim = new Date(diaria.dataFim);
+        const datasResult = validarDatas(diaria.dataInicio, diaria.dataFim);
+        if (datasResult.erro) return res.status(400).json({ erro: datasResult.erro });
 
-        if (isNaN(inicio.getTime())) return res.status(400).json({ erro: "Data de início inválida." });
-        if (isNaN(fim.getTime())) return res.status(400).json({ erro: "Data de fim inválida." });
+        const { inicio, fim } = datasResult;
+        const datasDoAluguel = gerarIntervalo(inicio, fim);
 
-        // valida que as datas fazem sentido
-        const hoje = new Date();
-        hoje.setHours(0, 0, 0, 0);
+        if (temConflito(quarto.diasAlugados, datasDoAluguel))
+            return res.status(409).json({ erro: "Quarto já alugado nesse período." });
 
-        if (inicio < hoje) {
-            return res.status(400).json({ erro: "A data de início não pode ser no passado." });
-        }
-        if (fim < inicio) {
-            return res.status(400).json({ erro: "A data de fim não pode ser anterior à data de início." });
-        }
-
-        // gera lista de datas do período alugado
-        const datasDoAluguel = [];
-        for (let d = new Date(inicio); d <= fim; d.setDate(d.getDate() + 1)) {
-            datasDoAluguel.push(new Date(d));
-        }
-
-        // verifica conflito com dias já alugados
-        const conflito = quarto.diasAlugados.some(dAlugada =>
-            datasDoAluguel.some(dNova =>
-                dAlugada.toDateString() === dNova.toDateString()
-            )
-        );
-        if (conflito) return res.status(409).json({ erro: "Quarto já alugado nesse período." });
-
-        // calcula o valor total com base no valorDiaria do quarto (não aceita valor do body)
-        const datasUnicas = [...new Set(datasDoAluguel.map(d => d.toDateString()))];
-        const numeroDiarias = datasUnicas.length;
-        const valorCalculado = numeroDiarias * quarto.valorDiaria;
+        const valorCalculado = contarDiarias(datasDoAluguel) * quarto.valorDiaria;
 
         const reserva = await Reserva.create({
             userId: req.userId,
-            cliente: clienteId,
+            cliente: user.clienteId,
             quarto: quartoId,
-            diaria: {
-                dataInicio: diaria.dataInicio,
-                dataFim: diaria.dataFim,
-                valor: valorCalculado
-            }
+            diaria: { dataInicio: diaria.dataInicio, dataFim: diaria.dataFim, valor: valorCalculado },
         });
 
-        await Cliente.findByIdAndUpdate(clienteId, { $push: { reservas: reserva._id } });
-        await Quarto.findByIdAndUpdate(quartoId, {
-            $push: { reservas: reserva._id, diasAlugados: { $each: datasDoAluguel } },
-            $set: { estaAlugado: true }
-        });
+        await Promise.all([
+            Cliente.findByIdAndUpdate(user.clienteId, { $push: { reservas: reserva._id } }),
+            Quarto.findByIdAndUpdate(quartoId, {
+                $push: { reservas: reserva._id, diasAlugados: { $each: datasDoAluguel } },
+                $set: { estaAlugado: true },
+            }),
+        ]);
 
         res.status(201).json(reserva);
     } catch (error) {
@@ -129,29 +98,23 @@ const deletarReserva = async (req, res) => {
         const reserva = await Reserva.findById(req.params.id);
         if (!reserva) return res.status(404).json({ erro: "Reserva não encontrada." });
 
-        // recalcula as datas que essa reserva ocupava para removê-las de diasAlugados
-        const inicio = new Date(reserva.diaria.dataInicio);
-        const fim = new Date(reserva.diaria.dataFim);
-        const datasDaReserva = [];
-        for (let d = new Date(inicio); d <= fim; d.setDate(d.getDate() + 1)) {
-            datasDaReserva.push(new Date(d));
-        }
-
-        await Reserva.findByIdAndDelete(req.params.id);
-        await Cliente.findByIdAndUpdate(reserva.cliente, { $pull: { reservas: reserva._id } });
-
-        // remove as datas ocupadas e a referência da reserva no quarto
-        const quarto = await Quarto.findById(reserva.quarto);
+        const datasDaReserva = gerarIntervalo(
+            new Date(reserva.diaria.dataInicio),
+            new Date(reserva.diaria.dataFim)
+        );
         const datasStrings = datasDaReserva.map(d => d.toDateString());
+
+        const quarto = await Quarto.findById(reserva.quarto);
         const diasRestantes = quarto.diasAlugados.filter(d => !datasStrings.includes(d.toDateString()));
 
-        await Quarto.findByIdAndUpdate(reserva.quarto, {
-            $pull: { reservas: reserva._id },
-            $set: {
-                diasAlugados: diasRestantes,
-                estaAlugado: diasRestantes.length > 0
-            }
-        });
+        await Promise.all([
+            Reserva.findByIdAndDelete(req.params.id),
+            Cliente.findByIdAndUpdate(reserva.cliente, { $pull: { reservas: reserva._id } }),
+            Quarto.findByIdAndUpdate(reserva.quarto, {
+                $pull: { reservas: reserva._id },
+                $set: { diasAlugados: diasRestantes, estaAlugado: diasRestantes.length > 0 },
+            }),
+        ]);
 
         res.json({ mensagem: "Reserva deletada com sucesso." });
     } catch (error) {

@@ -14,7 +14,7 @@ const criarQuarto = async (req, res) => {
 // Listar todos os quartos
 const listarQuartos = async (req, res) => {
     try {
-        const quartos = await Quarto.find().populate("reservas").populate("tags");
+        const quartos = await Quarto.find().populate("tags");
         res.json(quartos);
     } catch (error) {
         res.status(500).json({ erro: "Erro ao buscar quartos." });
@@ -24,7 +24,7 @@ const listarQuartos = async (req, res) => {
 // Buscar quarto por ID
 const buscarQuarto = async (req, res) => {
     try {
-        const quarto = await Quarto.findById(req.params.id).populate("reservas").populate("tags");
+        const quarto = await Quarto.findById(req.params.id).populate("tags");
         if (!quarto) return res.status(404).json({ erro: "Quarto não encontrado." });
         res.json(quarto);
     } catch (error) {
