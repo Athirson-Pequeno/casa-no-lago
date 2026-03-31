@@ -3,152 +3,184 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Login</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet">
+  <title>Casa do Lago — Login</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet"/>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-    --bg:        #f6f7f3;   
-    --surface:   #ffffff;   
-    --border:    #e3e7dc;   
-    --accent:    #6b8e23;   
-    --accent2:   #a3b18a;   
-    --danger:    #c97b63;   
-    --text:      #2f3e34;   
-    --muted:     #7c8a7a;   
-    --input-bg:  #f0f2ec;   
+      --bg:       #f7f4ef;
+      --surface:  #ffffff;
+      --beige:    #ede8df;
+      --brown:    #6b4f3a;
+      --brown-lt: #9b7558;
+      --green:    #3a5a40;
+      --green-lt: #5a8a62;
+      --text:     #1e1a16;
+      --muted:    #8a7f74;
+      --border:   #ddd6ca;
+      --danger:   #c0392b;
+      --input-bg: #faf8f5;
     }
 
     html, body {
-      min-height: 100vh;
+      height: 100%;
       background: var(--bg);
       color: var(--text);
-      font-family: 'Inter', sans-serif;
+      font-family: 'Jost', sans-serif;
+      font-weight: 300;
     }
 
-    /*background grid*/
-    body {
-    background: 
-        linear-gradient(rgba(246,247,243,0.88), rgba(246,247,243,0.92)),
-        url('https://images.unsplash.com/photo-1439066615861-d1af74d74000?q=80&w=773&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D')
-        center/cover no-repeat;
-    }
-
+    /* textura */
     body::before {
-        opacity: 0.12;
-        background-size: 72px 72px;
-    }
-
-    /*glow orb*/
-    body::after {
       content: '';
       position: fixed;
-      top: -120px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 640px;
-      height: 640px;
-      background: radial-gradient(circle, rgba(163,177,138,0.25) 0%, transparent 70%);
+      inset: 0;
+      background-image: radial-gradient(circle, var(--border) 1px, transparent 1px);
+      background-size: 28px 28px;
+      opacity: .35;
       pointer-events: none;
     }
 
-    /*layout*/
-    .wrapper {
+    /* glow */
+    body::after {
+      content: '';
+      position: fixed;
+      bottom: -160px;
+      right: -160px;
+      width: 560px;
+      height: 560px;
+      background: radial-gradient(circle, rgba(107,79,58,.10) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    /* layout */
+    .page {
       min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 24px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
       position: relative;
       z-index: 1;
     }
 
-    .card {
+    /* ilustracao */
+    .panel-left {
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 48px;
+    }
+
+    .panel-left svg.scene {
+      position: absolute;
+      inset: 0;
+      width: 100%; height: 100%;
+    }
+
+    .panel-left-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(30,26,22,.72) 0%, rgba(30,26,22,.08) 60%);
+    }
+
+    .panel-quote {
+      position: relative;
+      z-index: 2;
+    }
+
+    .panel-quote cite {
+      font-size: .74rem;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: rgba(247,244,239,.5);
+      font-style: normal;
+    }
+
+    /* form */
+    .panel-right {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 48px 40px;
+    }
+
+    .form-box {
       width: 100%;
-      max-width: 420px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 44px 40px 40px;
-      box-shadow:
-        0 0 0 1px rgba(94,106,210,.12),
-        0 32px 64px rgba(0,0,0,.6),
-        0 0 80px rgba(94,106,210,.06);
-      animation: fadeUp .5s cubic-bezier(.22,1,.36,1) both;
+      max-width: 400px;
+      animation: fadeUp .55s cubic-bezier(.22,1,.36,1) both;
     }
 
     @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(20px); }
+      from { opacity: 0; transform: translateY(18px); }
       to   { opacity: 1; transform: translateY(0); }
     }
 
-    /*logo | header*/
-    .logo-row {
+    /* logo */
+    .logo {
       display: flex;
       align-items: center;
       gap: 10px;
-      margin-bottom: 32px;
+      margin-bottom: 40px;
+      text-decoration: none;
     }
 
     .logo-icon {
-      width: 36px;
-      height: 36px;
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
-      border-radius: 9px;
+      width: 38px; height: 38px;
+      background: var(--brown);
+      border-radius: 10px;
       display: grid;
       place-items: center;
       flex-shrink: 0;
     }
 
-    .logo-icon svg { width: 18px; height: 18px; fill: #fff; }
+    .logo-icon svg { width: 18px; height: 18px; stroke: #f7f4ef; fill: none; stroke-width: 1.8; }
 
     .logo-text {
-      font-family: 'Inter', sans-serif;
-      font-weight: 800;
-      font-size: 1rem;
-      letter-spacing: .02em;
-      color: var(--text);
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--brown);
+      letter-spacing: .04em;
     }
 
-    .logo-text span { color: var(--accent2); }
+    .logo-text span { color: var(--green); font-style: italic; }
 
+    /* heading */
     h1 {
-      font-family: 'Inter', sans-serif;
-      font-weight: 700;
-      font-size: 1.55rem;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2rem;
+      font-weight: 400;
       line-height: 1.2;
       margin-bottom: 6px;
       color: var(--text);
     }
 
     .subtitle {
-      font-size: .8rem;
+      font-size: .82rem;
       color: var(--muted);
-      margin-bottom: 32px;
+      margin-bottom: 36px;
     }
 
-    /*form*/
-    .field { margin-bottom: 18px; }
+    /* fields */
+    .field { margin-bottom: 20px; }
 
     label {
       display: block;
-      font-size: .73rem;
+      font-size: .7rem;
       font-weight: 500;
-      letter-spacing: .08em;
+      letter-spacing: .1em;
       text-transform: uppercase;
       color: var(--muted);
       margin-bottom: 8px;
     }
 
-    .input-wrap {
-      position: relative;
-    }
+    .input-wrap { position: relative; }
 
     .input-wrap .icon {
       position: absolute;
-      left: 14px;
-      top: 50%;
+      left: 14px; top: 50%;
       transform: translateY(-50%);
       color: var(--muted);
       pointer-events: none;
@@ -157,31 +189,27 @@
 
     .input-wrap .toggle-pw {
       position: absolute;
-      right: 14px;
-      top: 50%;
+      right: 14px; top: 50%;
       transform: translateY(-50%);
-      background: none;
-      border: none;
-      color: var(--muted);
-      cursor: pointer;
-      padding: 0;
-      display: grid;
-      place-items: center;
+      background: none; border: none;
+      color: var(--muted); cursor: pointer;
+      padding: 0; display: grid; place-items: center;
       transition: color .2s;
     }
 
-    .input-wrap .toggle-pw:hover { color: var(--accent2); }
+    .input-wrap .toggle-pw:hover { color: var(--brown); }
 
-    input[type="text"],
     input[type="email"],
+    input[type="text"],
     input[type="password"] {
       width: 100%;
       background: var(--input-bg);
       border: 1px solid var(--border);
-      border-radius: 10px;
+      border-radius: 8px;
       color: var(--text);
-      font-family: 'Inter', sans-serif;
-      font-size: .875rem;
+      font-family: 'Jost', sans-serif;
+      font-size: .9rem;
+      font-weight: 300;
       padding: 12px 14px 12px 42px;
       outline: none;
       transition: border-color .2s, box-shadow .2s;
@@ -189,22 +217,18 @@
     }
 
     input:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(94,106,210,.18);
+      border-color: var(--brown-lt);
+      box-shadow: 0 0 0 3px rgba(107,79,58,.10);
     }
 
-    input:focus + .icon,
-    .input-wrap:focus-within .icon {
-      color: var(--accent2);
-    }
+    .input-wrap:focus-within .icon { color: var(--brown); }
 
-    /*msg de erro*/
+    /* msg de erro */
     .error-msg {
       display: none;
       font-size: .78rem;
       color: var(--danger);
       margin-top: 6px;
-      padding: 10px 14px;
       animation: shake .35s ease both;
     }
 
@@ -212,15 +236,15 @@
 
     @keyframes shake {
       0%,100% { transform: translateX(0); }
-      25%      { transform: translateX(-6px); }
-      75%      { transform: translateX(6px); }
+      25%      { transform: translateX(-5px); }
+      75%      { transform: translateX(5px); }
     }
 
-    /*forgot link*/
+    /* forgot */
     .forgot {
       text-align: right;
-      margin-top: -10px;
-      margin-bottom: 24px;
+      margin-top: -12px;
+      margin-bottom: 28px;
     }
 
     .forgot a {
@@ -230,38 +254,36 @@
       transition: color .2s;
     }
 
-    .forgot a:hover { color: var(--accent2); }
+    .forgot a:hover { color: var(--brown); }
 
-    /*botao*/
-    .btn {
+    /* botão */
+    .btn-login {
       width: 100%;
       padding: 13px;
-      background: var(--accent);
+      background: var(--green);
       color: #fff;
       border: none;
-      border-radius: 10px;
-      font-family: 'Inter', sans-serif;
-      font-weight: 700;
-      font-size: .95rem;
-      letter-spacing: .03em;
+      border-radius: 8px;
+      font-family: 'Jost', sans-serif;
+      font-weight: 500;
+      font-size: .88rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
       cursor: pointer;
-      position: relative;
-      overflow: hidden;
       transition: background .2s, transform .15s, box-shadow .2s;
     }
 
-    .btn:hover {
-      background: var(--accent2);
-      box-shadow: 0 8px 24px rgba(94,106,210,.35);
+    .btn-login:hover {
+      background: var(--brown);
+      box-shadow: 0 8px 24px rgba(107,79,58,.25);
       transform: translateY(-1px);
     }
 
-    .btn:active { transform: translateY(0); }
+    .btn-login:active { transform: translateY(0); }
 
-    .btn .spinner {
+    .btn-login .spinner {
       display: none;
-      width: 18px;
-      height: 18px;
+      width: 18px; height: 18px;
       border: 2px solid rgba(255,255,255,.3);
       border-top-color: #fff;
       border-radius: 50%;
@@ -269,12 +291,12 @@
       margin: 0 auto;
     }
 
-    .btn.loading .btn-text { display: none; }
-    .btn.loading .spinner  { display: block; }
+    .btn-login.loading .btn-text { display: none; }
+    .btn-login.loading .spinner  { display: block; }
 
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /*divider*/
+    /* divider */
     .divider {
       display: flex;
       align-items: center;
@@ -286,121 +308,188 @@
 
     .divider::before,
     .divider::after {
-      content: '';
-      flex: 1;
+      content: ''; flex: 1;
       height: 1px;
       background: var(--border);
     }
 
-    /*register link*/
+    /* registrar */
     .register-row {
       text-align: center;
-      font-size: .8rem;
+      font-size: .82rem;
       color: var(--muted);
     }
 
     .register-row a {
-      color: var(--accent2);
+      color: var(--brown);
       text-decoration: none;
       font-weight: 500;
       transition: color .2s;
     }
 
-    .register-row a:hover { color: var(--text); }
+    .register-row a:hover { color: var(--green); }
 
-    /*success toast*/
+    /* toast */
     .toast {
       display: none;
       position: fixed;
-      bottom: 28px;
-      right: 28px;
-      background: #1a2a1a;
-      border: 1px solid #2a4a2a;
-      color: #6fcf6f;
-      padding: 12px 20px;
-      border-radius: 10px;
+      bottom: 28px; right: 28px;
+      background: var(--green);
+      color: #fff;
+      padding: 13px 22px;
+      border-radius: 8px;
       font-size: .82rem;
       z-index: 99;
-      animation: slideIn .3s ease both;
+      animation: slideUp .3s ease both;
     }
 
     .toast.show { display: block; }
 
-    @keyframes slideIn {
+    @keyframes slideUp {
       from { opacity: 0; transform: translateY(10px); }
       to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* responsividade */
+    @media (max-width: 720px) {
+      .page { grid-template-columns: 1fr; }
+      .panel-left { display: none; }
+      .panel-right { padding: 40px 24px; }
     }
   </style>
 </head>
 <body>
-<div class="wrapper">
-  <div class="card">
+<div class="page">
 
-    <div class="logo-row">
-      <div class="logo-icon">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-house-icon lucide-house"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
-      </div>
-      <div class="logo-text">CASA<span> NO LAGO</span></div>
+  <!-- painel esquerdo -->
+  <div class="panel-left">
+    <svg class="scene" viewBox="0 0 720 900" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+      <defs>
+        <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#a8c8e8"/>
+          <stop offset="100%" stop-color="#d6e8d6"/>
+        </linearGradient>
+      </defs>
+      <rect width="720" height="900" fill="url(#sky)"/>
+      <ellipse cx="120" cy="700" rx="300" ry="180" fill="#7aaa7a" opacity=".6"/>
+      <ellipse cx="600" cy="720" rx="320" ry="170" fill="#6a9a6a" opacity=".6"/>
+      <ellipse cx="360" cy="750" rx="400" ry="160" fill="#5a8a5a" opacity=".5"/>
+      <rect x="0" y="680" width="720" height="220" fill="#5a9ab8" opacity=".55"/>
+      <rect x="0" y="710" width="720" height="190" fill="#4a8aaa" opacity=".45"/>
+      <line x1="60"  y1="730" x2="220" y2="730" stroke="#fff" stroke-width="1.5" opacity=".25"/>
+      <line x1="300" y1="745" x2="520" y2="745" stroke="#fff" stroke-width="1.5" opacity=".25"/>
+      <line x1="580" y1="735" x2="700" y2="735" stroke="#fff" stroke-width="1"   opacity=".2"/>
+      <line x1="100" y1="760" x2="300" y2="760" stroke="#fff" stroke-width="1"   opacity=".18"/>
+      <line x1="400" y1="768" x2="650" y2="768" stroke="#fff" stroke-width="1"   opacity=".18"/>
+      <rect x="270" y="520" width="180" height="170" rx="4" fill="#f0e6d8"/>
+      <polygon points="250,528 360,440 470,528" fill="#7a5a42"/>
+      <rect x="285" y="540" width="55" height="45" rx="4" fill="#8ab8cc" opacity=".8"/>
+      <rect x="380" y="540" width="55" height="45" rx="4" fill="#8ab8cc" opacity=".8"/>
+      <rect x="330" y="615" width="40" height="75" rx="3" fill="#5a3a28"/>
+      <rect x="400" y="425" width="18" height="40" fill="#6a4a32"/>
+      <rect x="345" y="688" width="8"  height="50" fill="#8b6a52"/>
+      <rect x="375" y="688" width="8"  height="50" fill="#8b6a52"/>
+      <rect x="338" y="682" width="52" height="9"  rx="2" fill="#a08060"/>
+      <rect x="150" y="560" width="10" height="130" fill="#4a3020"/>
+      <ellipse cx="155" cy="540" rx="40" ry="50" fill="#3a6a3a"/>
+      <ellipse cx="155" cy="518" rx="28" ry="36" fill="#4a7a4a"/>
+      <rect x="210" y="575" width="10" height="115" fill="#4a3020"/>
+      <ellipse cx="215" cy="556" rx="35" ry="44" fill="#2a5a2a"/>
+      <rect x="545" y="555" width="10" height="135" fill="#4a3020"/>
+      <ellipse cx="550" cy="534" rx="42" ry="52" fill="#3a6a3a"/>
+      <ellipse cx="550" cy="510" rx="30" ry="38" fill="#4a7a4a"/>
+      <rect x="490" y="572" width="10" height="118" fill="#4a3020"/>
+      <ellipse cx="495" cy="552" rx="36" ry="45" fill="#2a5a2a"/>
+      <ellipse cx="120" cy="120" rx="90" ry="34" fill="#fff" opacity=".5"/>
+      <ellipse cx="190" cy="110" rx="62" ry="27" fill="#fff" opacity=".45"/>
+      <ellipse cx="62"  cy="130" rx="48" ry="22" fill="#fff" opacity=".4"/>
+      <ellipse cx="560" cy="100" rx="100" ry="36" fill="#fff" opacity=".45"/>
+      <ellipse cx="644" cy="90"  rx="66"  ry="28" fill="#fff" opacity=".4"/>
+      <circle cx="620" cy="130" r="55" fill="#f5d78e" opacity=".6"/>
+      <circle cx="620" cy="130" r="40" fill="#f0c860" opacity=".5"/>
+      <path d="M200 200 Q210 193 220 200" stroke="#4a3020" stroke-width="1.5" fill="none" opacity=".4"/>
+      <path d="M230 185 Q240 178 250 185" stroke="#4a3020" stroke-width="1.5" fill="none" opacity=".35"/>
+      <path d="M260 210 Q268 204 276 210" stroke="#4a3020" stroke-width="1.5" fill="none" opacity=".3"/>
+    </svg>
+    <div class="panel-left-overlay"></div>
+    <div class="panel-quote">
+      <cite>Casa do Lago — sua estadia à beira d'água</cite>
     </div>
+  </div>
 
-    <h3>Bem-vindo à sua experiência no lago!</h3>
-    <p class="subtitle">acesse sua conta para reservar seu quarto</p>
+  <!-- formulário -->
+  <div class="panel-right">
+    <div class="form-box">
 
-    <div class="field">
-      <label for="email">E-mail</label>
-      <div class="input-wrap">
-        <input type="email" id="email" placeholder="seu@email.com" autocomplete="email" />
-        <svg class="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-          <polyline points="22,6 12,13 2,6"/>
-        </svg>
-      </div>
-    </div>
-
-    <div class="field">
-      <label for="password">Senha</label>
-      <div class="input-wrap">
-        <input type="password" id="password" placeholder="••••••••" autocomplete="current-password" />
-        <svg class="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-          <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-        </svg>
-        <button class="toggle-pw" type="button" aria-label="Mostrar senha" id="togglePw">
-          <svg id="eyeIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-            <circle cx="12" cy="12" r="3"/>
+      <a href="#" class="logo">
+        <div class="logo-icon">
+          <svg viewBox="0 0 24 24">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+            <polyline points="9 22 9 12 15 12 15 22"/>
           </svg>
-        </button>
+        </div>
+        <div class="logo-text">Casa do <span>Lago</span></div>
+      </a>
+
+      <h1>Bem-vindo</h1>
+      <p class="subtitle">Entre com suas credenciais para continuar</p>
+
+      <div class="field">
+        <label for="email">E-mail</label>
+        <div class="input-wrap">
+          <input type="email" id="email" placeholder="seu@email.com" autocomplete="email"/>
+          <svg class="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+            <polyline points="22,6 12,13 2,6"/>
+          </svg>
+        </div>
       </div>
+
+      <div class="field">
+        <label for="password">Senha</label>
+        <div class="input-wrap">
+          <input type="password" id="password" placeholder="••••••••" autocomplete="current-password"/>
+          <svg class="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+          <button class="toggle-pw" type="button" aria-label="Mostrar senha" id="togglePw">
+            <svg id="eyeIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div id="errorMsg" class="error-msg"></div>
+
+      <div class="forgot"><a href="#">Esqueceu a senha?</a></div>
+
+      <button class="btn-login" id="loginBtn" type="button">
+        <span class="btn-text">Entrar</span>
+        <div class="spinner"></div>
+      </button>
+
+      <div class="divider">ou</div>
+
+      <div class="register-row">
+        Não tem conta? <a href="#">Criar conta</a>
+      </div>
+
     </div>
-
-    <div id="errorMsg" class="error-msg"></div>
-
-    <div class="forgot"><a href="#">Esqueceu a senha?</a></div>
-
-    <button class="btn" id="loginBtn" type="button">
-      <span class="btn-text">Entrar</span>
-      <div class="spinner"></div>
-    </button>
-
-    <div class="divider">ou</div>
-
-    <div class="register-row">
-      Não tem conta? <a href="#">Registre-se</a>
-    </div>
-
   </div>
 </div>
 
-<div class="toast" id="toast">✓ Login realizado! Preparando sua experiência no lago...</div>
+<div class="toast" id="toast">✓ Login realizado com sucesso!</div>
 
 <script>
-  //toggle password visibility
-  const togglePw  = document.getElementById('togglePw');
-  const pwInput   = document.getElementById('password');
-  const eyeIcon   = document.getElementById('eyeIcon');
+  // toggle senha
+  const togglePw = document.getElementById('togglePw');
+  const pwInput  = document.getElementById('password');
+  const eyeIcon  = document.getElementById('eyeIcon');
 
-  const eyeOpen  = `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>`;
+  const eyeOpen   = `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>`;
   const eyeClosed = `<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/>`;
 
   togglePw.addEventListener('click', () => {
@@ -409,7 +498,7 @@
     eyeIcon.innerHTML = show ? eyeClosed : eyeOpen;
   });
 
-  //login
+  // login 
   const loginBtn = document.getElementById('loginBtn');
   const errorMsg = document.getElementById('errorMsg');
   const toast    = document.getElementById('toast');
@@ -417,16 +506,12 @@
   function showError(msg) {
     errorMsg.textContent = msg;
     errorMsg.classList.remove('show');
-    void errorMsg.offsetWidth; // reflow para re-disparar animação
+    void errorMsg.offsetWidth;
     errorMsg.classList.add('show');
   }
 
-  function hideError() {
-    errorMsg.classList.remove('show');
-  }
-
   loginBtn.addEventListener('click', async () => {
-    hideError();
+    errorMsg.classList.remove('show');
 
     const email    = document.getElementById('email').value.trim();
     const password = pwInput.value;
@@ -437,7 +522,7 @@
     loginBtn.classList.add('loading');
 
     try {
-      const res = await fetch('/auth/login', {
+      const res  = await fetch('/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })
@@ -446,26 +531,24 @@
       const data = await res.json().catch(() => ({}));
 
       if (res.ok) {
-        // guarda token se a API retornar
         if (data.token) localStorage.setItem('token', data.token);
-
+        if (data.nome)  localStorage.setItem('userName', data.nome);
         toast.classList.add('show');
         setTimeout(() => {
           toast.classList.remove('show');
-          // redirecionar após login
-        }, 2500);
+          window.location.href = '/home.html';
+        }, 1800);
       } else {
-        showError(data.message || data.error || 'Credenciais inválidas! Tente novamente.');
+        showError(data.message || data.error || 'Credenciais inválidas. Tente novamente!');
       }
-    } catch (err) {
+    } catch {
       showError('Erro de conexão com o servidor.');
     } finally {
       loginBtn.classList.remove('loading');
     }
   });
 
-  // enter para submeter
-  document.addEventListener('keydown', (e) => {
+  document.addEventListener('keydown', e => {
     if (e.key === 'Enter') loginBtn.click();
   });
 </script>
