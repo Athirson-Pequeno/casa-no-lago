@@ -1,10 +1,11 @@
 export async function request(url, options = {}) {
+  const { headers: extraHeaders, ...requestOptions } = options;
   const response = await fetch(url, {
+    ...requestOptions,
     headers: {
       'Content-Type': 'application/json',
-      ...options.headers,
+      ...extraHeaders,
     },
-    ...options,
   });
 
   const data = await response.json();

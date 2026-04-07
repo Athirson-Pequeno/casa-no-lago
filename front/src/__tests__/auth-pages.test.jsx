@@ -2,9 +2,10 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { AuthProvider } from '../context/AuthContext';
+import { AuthProvider, hasValidStoredSession } from '../context/AuthContext';
 import { LoginPage } from '../pages/LoginPage';
 import { RegisterPage } from '../pages/RegisterPage';
+import { request } from '../services/http';
 
 function renderAuth(route = '/login') {
   return render(
@@ -31,7 +32,7 @@ describe('auth pages', () => {
       'fetch',
       vi.fn().mockResolvedValue({
         ok: true,
-        json: async () => ({ token: 'token-123', msg: 'ok' }),
+        json: async () => ({ token: 'token-123', expiredAt: 900, msg: 'ok' }),
       }),
     );
 
@@ -43,7 +44,10 @@ describe('auth pages', () => {
     await user.click(screen.getByRole('button', { name: /entrar/i }));
 
     await waitFor(() => {
-      expect(localStorage.getItem('token')).toBe('token-123');
+      expect(JSON.parse(localStorage.getItem('token'))).toMatchObject({
+        token: 'token-123',
+        expiresAt: expect.any(Number),
+      });
     });
     expect(await screen.findByText(/pagina inicial/i)).toBeInTheDocument();
   });
@@ -85,13 +89,57 @@ describe('auth pages', () => {
     expect(await screen.findByRole('heading', { name: /entrar/i })).toBeInTheDocument();
   });
 
-  it('restaura a sessao a partir do localStorage', async () => {
-    localStorage.setItem('token', 'token-restaurado');
+  it('restaura a sessao validando o vencimento armazenado', async () => {
+    localStorage.setItem(
+      'token',
+      JSON.stringify({
+        token: 'token-restaurado',
+        expiresAt: Date.now() + 60_000,
+      }),
+    );
+
+    expect(hasValidStoredSession()).toBe(true);
 
     renderAuth('/login');
 
     await waitFor(() => {
       expect(screen.getByText(/pagina inicial/i)).toBeInTheDocument();
     });
+  });
+
+  it('ignora uma sessao expirada ou invalida e mantem acesso ao login', async () => {
+    localStorage.setItem('token', 'token-restaurado');
+
+    renderAuth('/login');
+
+    expect(screen.getByRole('heading', { name: /entrar/i })).toBeInTheDocument();
+    expect(screen.queryByText(/pagina inicial/i)).not.toBeInTheDocument();
+  });
+
+  it('preserva headers extras ao enviar requests de auth', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ msg: 'ok' }),
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    await request('/auth/login', {
+      method: 'POST',
+      headers: {
+        Authorization: 'Bearer token-123',
+      },
+      body: JSON.stringify({ email: 'teste@casa.com', password: '123456' }),
+    });
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      '/auth/login',
+      expect.objectContaining({
+        method: 'POST',
+        headers: expect.objectContaining({
+          'Content-Type': 'application/json',
+          Authorization: 'Bearer token-123',
+        }),
+      }),
+    );
   });
 });

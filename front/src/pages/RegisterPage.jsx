@@ -1,18 +1,15 @@
-import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { AuthLayout } from '../components/auth/AuthLayout';
 import { RegisterForm } from '../components/auth/RegisterForm';
-import { useAuth } from '../context/AuthContext';
+import { hasValidStoredSession, useAuth } from '../context/AuthContext';
 
 export function RegisterPage() {
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (isAuthenticated) {
-      navigate('/', { replace: true });
-    }
-  }, [isAuthenticated, navigate]);
+  if (isAuthenticated || hasValidStoredSession()) {
+    return <Navigate to="/" replace />;
+  }
 
   return (
     <AuthLayout
