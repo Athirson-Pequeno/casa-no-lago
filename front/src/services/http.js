@@ -11,7 +11,7 @@ export async function request(url, options = {}) {
   const data = await response.json();
 
   if (!response.ok) {
-    throw new Error(data.msg || 'Nao foi possivel concluir a requisicao.');
+    throw new Error(data.erro || data.msg || 'Nao foi possivel concluir a requisicao.');
   }
 
   return data;
