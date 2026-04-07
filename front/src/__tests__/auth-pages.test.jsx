@@ -32,7 +32,7 @@ describe('auth pages', () => {
       'fetch',
       vi.fn().mockResolvedValue({
         ok: true,
-        json: async () => ({ token: 'token-123', expiredAt: 900, msg: 'ok' }),
+        json: async () => ({ token: 'token-123', expiredAt: 900, role: 'admin', name: 'Luiz', msg: 'ok' }),
       }),
     );
 
@@ -40,13 +40,15 @@ describe('auth pages', () => {
     const user = userEvent.setup();
 
     await user.type(screen.getByLabelText(/e-mail/i), 'teste@casa.com');
-    await user.type(screen.getByLabelText(/senha/i), '123456');
-    await user.click(screen.getByRole('button', { name: /entrar/i }));
+    await user.type(screen.getByLabelText(/^senha$/i), '123456');
+    await user.click(screen.getByRole('button', { name: /^entrar$/i }));
 
     await waitFor(() => {
       expect(JSON.parse(localStorage.getItem('token'))).toMatchObject({
         token: 'token-123',
         expiresAt: expect.any(Number),
+        role: 'admin',
+        name: 'Luiz',
       });
     });
     expect(await screen.findByText(/pagina inicial/i)).toBeInTheDocument();
@@ -141,5 +143,20 @@ describe('auth pages', () => {
         }),
       }),
     );
+  });
+
+  it('mantem a composicao editorial da tela de login original', async () => {
+    renderAuth('/login');
+
+    expect(screen.getByRole('heading', { name: /entrar/i })).toBeInTheDocument();
+    expect(
+      screen.getByText(/acesse sua conta para acompanhar reservas e preparar a chegada com calma/i),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/casa do lago/i)).toBeInTheDocument();
+    expect(screen.getByText(/sua estadia a beira d'agua/i)).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /casa do lago/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /mostrar senha/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /esqueceu a senha/i })).toBeInTheDocument();
+    expect(screen.getByText(/^ou$/i)).toBeInTheDocument();
   });
 });

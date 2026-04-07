@@ -7,6 +7,15 @@ export function loginRequest({ email, password }) {
   });
 }
 
+export function getCurrentUserRequest(token) {
+  return request('/auth/me', {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+}
+
 export function registerRequest(payload) {
   return request('/auth/register', {
     method: 'POST',

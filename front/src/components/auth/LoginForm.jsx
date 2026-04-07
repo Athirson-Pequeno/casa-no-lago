@@ -11,6 +11,7 @@ export function LoginForm({ onSuccess }) {
   const [values, setValues] = useState(initialValues);
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   function handleChange(event) {
     const { name, value } = event.target;
@@ -36,19 +37,43 @@ export function LoginForm({ onSuccess }) {
     <form className="auth-form" onSubmit={handleSubmit}>
       <label className="auth-field">
         <span>E-mail</span>
-        <input name="email" type="email" value={values.email} onChange={handleChange} required />
+        <div className="auth-input-wrap">
+          <input name="email" type="email" value={values.email} onChange={handleChange} required />
+        </div>
       </label>
 
       <label className="auth-field">
         <span>Senha</span>
-        <input name="password" type="password" value={values.password} onChange={handleChange} required />
+        <div className="auth-input-wrap">
+          <input
+            name="password"
+            type={showPassword ? 'text' : 'password'}
+            value={values.password}
+            onChange={handleChange}
+            required
+          />
+          <button
+            className="auth-toggle"
+            type="button"
+            aria-label="Mostrar senha"
+            onClick={() => setShowPassword((current) => !current)}
+          >
+            {showPassword ? 'Ocultar' : 'Mostrar'}
+          </button>
+        </div>
       </label>
 
       {error ? <p className="auth-error">{error}</p> : null}
 
-      <button className="auth-submit" type="submit" disabled={isSubmitting}>
-        {isSubmitting ? 'Entrando...' : 'Entrar'}
+      <p className="auth-forgot">
+        <a href="#">Esqueceu a senha?</a>
+      </p>
+
+      <button className={`auth-submit${isSubmitting ? ' is-loading' : ''}`} type="submit" disabled={isSubmitting}>
+        <span className="auth-submit__text">{isSubmitting ? 'Entrando...' : 'Entrar'}</span>
       </button>
+
+      <div className="auth-divider">ou</div>
     </form>
   );
 }

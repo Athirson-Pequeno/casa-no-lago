@@ -39,44 +39,56 @@ export function RegisterForm({ onSuccess }) {
     <form className="auth-form" onSubmit={handleSubmit}>
       <label className="auth-field">
         <span>Nome</span>
-        <input name="name" value={values.name} onChange={handleChange} required />
+        <div className="auth-input-wrap">
+          <input name="name" value={values.name} onChange={handleChange} required />
+        </div>
       </label>
 
       <label className="auth-field">
         <span>E-mail</span>
-        <input name="email" type="email" value={values.email} onChange={handleChange} required />
+        <div className="auth-input-wrap">
+          <input name="email" type="email" value={values.email} onChange={handleChange} required />
+        </div>
       </label>
 
       <label className="auth-field">
         <span>Senha</span>
-        <input name="password" type="password" value={values.password} onChange={handleChange} required />
+        <div className="auth-input-wrap">
+          <input name="password" type="password" value={values.password} onChange={handleChange} required />
+        </div>
       </label>
 
       <label className="auth-field">
         <span>Confirmar senha</span>
-        <input
-          name="confirmpassword"
-          type="password"
-          value={values.confirmpassword}
-          onChange={handleChange}
-          required
-        />
+        <div className="auth-input-wrap">
+          <input
+            name="confirmpassword"
+            type="password"
+            value={values.confirmpassword}
+            onChange={handleChange}
+            required
+          />
+        </div>
       </label>
 
       <label className="auth-field">
         <span>Telefone</span>
-        <input name="telefone" value={values.telefone} onChange={handleChange} required />
+        <div className="auth-input-wrap">
+          <input name="telefone" value={values.telefone} onChange={handleChange} required />
+        </div>
       </label>
 
       <label className="auth-field">
         <span>CPF</span>
-        <input name="cpf" value={values.cpf} onChange={handleChange} required />
+        <div className="auth-input-wrap">
+          <input name="cpf" value={values.cpf} onChange={handleChange} required />
+        </div>
       </label>
 
       {error ? <p className="auth-error">{error}</p> : null}
 
-      <button className="auth-submit" type="submit" disabled={isSubmitting}>
-        {isSubmitting ? 'Criando...' : 'Criar conta'}
+      <button className={`auth-submit${isSubmitting ? ' is-loading' : ''}`} type="submit" disabled={isSubmitting}>
+        <span className="auth-submit__text">{isSubmitting ? 'Criando...' : 'Criar conta'}</span>
       </button>
     </form>
   );

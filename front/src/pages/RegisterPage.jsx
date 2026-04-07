@@ -13,12 +13,12 @@ export function RegisterPage() {
 
   return (
     <AuthLayout
-      eyebrow="Nova jornada"
       title="Criar conta"
-      description="Crie seu acesso para reservar quartos, guardar seus dados e voltar sempre que quiser."
+      description="Preencha seus dados para reservar quartos e acompanhar sua estadia."
       footerText="Ja tem uma conta?"
       footerLink="/login"
       footerLabel="Entrar"
+      quote="Casa do Lago — sua estadia a beira d'agua"
     >
       <RegisterForm onSuccess={() => navigate('/login', { replace: true })} />
     </AuthLayout>

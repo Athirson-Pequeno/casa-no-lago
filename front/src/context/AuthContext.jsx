@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
-import { loginRequest } from '../services/auth';
+import { getCurrentUserRequest, loginRequest } from '../services/auth';
 
 const AUTH_STORAGE_KEY = 'token';
 
@@ -36,7 +36,10 @@ function writeStoredSession(session) {
 }
 
 const defaultAuthContext = {
+  name: '',
   token: '',
+  role: '',
+  isAdmin: false,
   isAuthenticated: false,
   login: async () => {
     throw new Error('AuthProvider nao encontrado.');
@@ -55,6 +58,8 @@ export function AuthProvider({ children }) {
     const nextSession = {
       token: response.token,
       expiresAt: Date.now() + Number(response.expiredAt) * 1000,
+      name: response.name || '',
+      role: response.role || '',
     };
 
     writeStoredSession(nextSession);
@@ -86,9 +91,54 @@ export function AuthProvider({ children }) {
     return () => window.clearTimeout(timeoutId);
   }, [session]);
 
+  useEffect(() => {
+    let isMounted = true;
+
+    async function syncRole() {
+      if (!session?.token || (session.role && session.name)) {
+        return;
+      }
+
+      try {
+        const response = await getCurrentUserRequest(session.token);
+
+        if (!isMounted) {
+          return;
+        }
+
+        const nextRole = typeof response?.role === 'string' ? response.role : session.role || '';
+        const nextName = typeof response?.name === 'string' ? response.name : session.name || '';
+
+        if ((nextRole === (session.role || '')) && (nextName === (session.name || ''))) {
+          return;
+        }
+
+        const nextSession = {
+          ...session,
+          role: nextRole,
+          name: nextName,
+        };
+
+        writeStoredSession(nextSession);
+        setSession(nextSession);
+      } catch {
+        return;
+      }
+    }
+
+    syncRole();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [session]);
+
   const value = useMemo(
     () => ({
+      name: session?.name || '',
       token: session?.token || '',
+      role: session?.role || '',
+      isAdmin: session?.role === 'admin',
       isAuthenticated: Boolean(session?.token) && session.expiresAt > Date.now(),
       login,
       logout,

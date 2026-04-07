@@ -4,6 +4,7 @@ const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const User = require('../models/userModel')
 const Cliente = require('../models/clienteModel')
+const { checkToken } = require('../middlewares/authMiddleware')
 
 // ---- REGISTRO ----
 
@@ -94,9 +95,35 @@ router.post('/login', async (req, res) => {
     try {
         const secret = process.env.SECRET
         const token = jwt.sign({ id: user._id }, secret, { expiresIn: '15m' })
-        res.status(200).json({ msg: 'Autenticação realizada com sucesso', token, expiredAt: 900 })
+        res.status(200).json({
+            msg: 'Autenticação realizada com sucesso',
+            token,
+            expiredAt: 900,
+            name: user.name,
+            role: user.role || 'user',
+        })
     } catch (err) {
         console.log(err)
+        res.status(500).json({ msg: 'Erro no servidor, tente novamente mais tarde!' })
+    }
+})
+
+router.get('/me', checkToken, async (req, res) => {
+    try {
+        const user = await User.findById(req.userId).select('name email role')
+
+        if (!user) {
+            return res.status(404).json({ msg: 'Usuario não encontrado' })
+        }
+
+        res.status(200).json({
+            id: user._id,
+            name: user.name,
+            email: user.email,
+            role: user.role || 'user',
+        })
+    } catch (error) {
+        console.log(error)
         res.status(500).json({ msg: 'Erro no servidor, tente novamente mais tarde!' })
     }
 })

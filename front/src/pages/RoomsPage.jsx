@@ -1,23 +1,18 @@
 import { useNavigate } from 'react-router-dom';
 import { ReservationModal } from '../components/home/ReservationModal';
-import { HeroSection } from '../components/home/HeroSection';
 import { RoomsCatalogSection } from '../components/home/RoomsCatalogSection';
-import { RoomSearchBar } from '../components/home/RoomSearchBar';
 import { Footer } from '../components/layout/Footer';
 import { Navbar } from '../components/layout/Navbar';
 import { useAuth } from '../context/AuthContext';
 import { useRoomsCatalog } from '../hooks/useRoomsCatalog';
 import '../styles/home.css';
 
-export function HomePage() {
+export function RoomsPage() {
   const navigate = useNavigate();
   const { isAuthenticated, token } = useAuth();
   const {
     feedbackMessage,
-    filters,
     handleCloseReservationModal,
-    handleFilterChange,
-    handleFilterSubmit,
     handleReservationSubmit,
     handleReserve,
     selectedRoom,
@@ -28,21 +23,24 @@ export function HomePage() {
     isAuthenticated,
     onRequireLogin: () => navigate('/login'),
     token,
+    withAvailabilityFilter: false,
   });
 
   return (
-    <div className="home-page">
+    <div className="home-page rooms-page">
       <Navbar />
 
-      <main>
-        <HeroSection />
-        <RoomSearchBar filters={filters} onChange={handleFilterChange} onSubmit={handleFilterSubmit} />
+      <main className="rooms-page__main">
+        <section className="rooms-page__intro">
+          <p className="rooms-page__eyebrow">Catalogo completo</p>
+          <h1 className="rooms-page__title">Todos os quartos</h1>
+        </section>
+
         <RoomsCatalogSection
           feedbackMessage={feedbackMessage}
+          heading="Nossos quartos"
           onReserve={handleReserve}
-          previewLimit={3}
           rooms={visibleRooms}
-          showAllLink
           status={status}
         />
       </main>
