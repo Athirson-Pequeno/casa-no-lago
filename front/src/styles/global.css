@@ -1,0 +1,32 @@
+:root {
+  --bg: #f7f4ef;
+  --surface: #ffffff;
+  --beige: #ede8df;
+  --brown: #6b4f3a;
+  --brown-lt: #9b7558;
+  --green: #3a5a40;
+  --green-lt: #5a8a62;
+  --text: #1e1a16;
+  --muted: #8a7f74;
+  --border: #ddd6ca;
+  --danger: #c0392b;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Jost', sans-serif;
+}
