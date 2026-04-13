@@ -55,6 +55,17 @@ app.use('/tags',     tagRoute);
 // ── SERVIDOR ──────────────────────────────────────────────────────────────────
 // O Render injeta process.env.PORT automaticamente; localmente usa 3000.
 const PORT = process.env.PORT || 3000;
+
+// ping para não deixar o Render "dormir" o serviço, mantendo-o responsivo. Intervalo de 13 minutos.
+const RENDER_URL = process.env.RENDER_EXTERNAL_URL;
+if (RENDER_URL) {
+  setInterval(() => {
+    fetch(`${RENDER_URL}/`)
+      .then(() => console.log('🏓 ping keep-alive'))
+      .catch(err => console.warn('⚠️ ping falhou:', err.message));
+  }, 13 * 60 * 1000);
+}
+
 app.listen(PORT, () => {
   console.log(`✅ Servidor rodando na porta ${PORT}`);
 });
