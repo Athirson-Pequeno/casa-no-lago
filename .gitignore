@@ -1,0 +1,14 @@
+# Dependências
+node_modules/
+
+# Variáveis de ambiente — NUNCA suba o .env real
+*.env
+.env.local
+.env.*.local
+
+# Build do Vite
+front/dist/
+
+# Logs
+*.log
+npm-debug.log*

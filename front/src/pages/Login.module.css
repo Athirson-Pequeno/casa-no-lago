@@ -1,0 +1,310 @@
+.page {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  position: relative;
+}
+
+/* textura de fundo */
+.page::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: radial-gradient(circle, var(--border) 1px, transparent 1px);
+  background-size: 28px 28px;
+  opacity: .35;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* PAINEL ESQUERDO */
+.panelLeft {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 48px;
+}
+
+.scene {
+  position: absolute;
+  inset: 0;
+  width: 100%; height: 100%;
+}
+
+.panelOverlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(30,26,22,.72) 0%, rgba(30,26,22,.08) 60%);
+}
+
+.panelQuote {
+  position: relative;
+  z-index: 2;
+}
+
+.panelQuote cite {
+  font-size: .74rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: rgba(247,244,239,.5);
+  font-style: normal;
+}
+
+/* PAINEL DIREITO */
+.panelRight {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 40px;
+  position: relative;
+  z-index: 1;
+  background: var(--bg);
+}
+
+.formBox {
+  width: 100%;
+  max-width: 400px;
+  animation: fadeUp .55s cubic-bezier(.22,1,.36,1) both;
+}
+
+/* LOGO */
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 40px;
+  text-decoration: none;
+}
+
+.logoIcon {
+  width: 38px; height: 38px;
+  background: var(--brown);
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.logoIcon svg { width: 18px; height: 18px; }
+
+.logoText {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--brown);
+  letter-spacing: .04em;
+}
+
+.logoText span { color: var(--green); font-style: italic; }
+
+/* HEADING */
+.heading {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 2rem;
+  font-weight: 400;
+  line-height: 1.2;
+  margin-bottom: 6px;
+  color: var(--text);
+}
+
+.subtitle {
+  font-size: .82rem;
+  color: var(--muted);
+  margin-bottom: 36px;
+}
+
+/* CAMPOS */
+.field { margin-bottom: 20px; }
+
+.field label {
+  display: block;
+  font-size: .7rem;
+  font-weight: 500;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+.inputWrap { position: relative; }
+
+.inputWrap input {
+  width: 100%;
+  background: var(--input-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-family: 'Jost', sans-serif;
+  font-size: .9rem;
+  font-weight: 300;
+  padding: 12px 14px 12px 42px;
+  outline: none;
+  transition: border-color .2s, box-shadow .2s;
+}
+
+.inputWrap input:focus {
+  border-color: var(--brown-lt);
+  box-shadow: 0 0 0 3px rgba(107,79,58,.10);
+}
+
+.icon {
+  position: absolute;
+  left: 14px; top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted);
+  pointer-events: none;
+  transition: color .2s;
+}
+
+.inputWrap:focus-within .icon { color: var(--brown); }
+
+.togglePw {
+  position: absolute;
+  right: 14px; top: 50%;
+  transform: translateY(-50%);
+  background: none; border: none;
+  color: var(--muted); cursor: pointer;
+  padding: 0; display: grid; place-items: center;
+  transition: color .2s;
+}
+
+.togglePw:hover { color: var(--brown); }
+
+/* ERRO */
+.errorMsg {
+  font-size: .78rem;
+  color: var(--danger);
+  margin-top: -10px;
+  margin-bottom: 12px;
+  animation: shake .35s ease both;
+}
+
+@keyframes shake {
+  0%,100% { transform: translateX(0); }
+  25%      { transform: translateX(-5px); }
+  75%      { transform: translateX(5px); }
+}
+
+/* ESQUECI */
+.forgot {
+  text-align: right;
+  margin-top: -12px;
+  margin-bottom: 28px;
+}
+
+.forgot a {
+  font-size: .78rem;
+  color: var(--muted);
+  text-decoration: none;
+  transition: color .2s;
+}
+
+.forgot a:hover { color: var(--brown); }
+
+/* BOTÃO */
+.btnLogin {
+  width: 100%;
+  padding: 13px;
+  background: var(--green);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-family: 'Jost', sans-serif;
+  font-weight: 500;
+  font-size: .88rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background .2s, transform .15s, box-shadow .2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+}
+
+.btnLogin:hover:not(:disabled) {
+  background: var(--brown);
+  box-shadow: 0 8px 24px rgba(107,79,58,.25);
+  transform: translateY(-1px);
+}
+
+.btnLogin:active { transform: translateY(0); }
+.btnLogin:disabled { opacity: .7; cursor: not-allowed; }
+
+.spinner {
+  width: 18px; height: 18px;
+  border: 2px solid rgba(255,255,255,.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin .6s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* DIVIDER */
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 24px 0;
+  color: var(--muted);
+  font-size: .75rem;
+}
+
+.divider::before,
+.divider::after {
+  content: ''; flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* REGISTRAR */
+.registerRow {
+  text-align: center;
+  font-size: .82rem;
+  color: var(--muted);
+}
+
+.registerRow a {
+  color: var(--brown);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color .2s;
+}
+
+.registerRow a:hover { color: var(--green); }
+
+/* TOAST */
+.toast {
+  display: none;
+  position: fixed;
+  bottom: 28px; right: 28px;
+  background: var(--green);
+  color: #fff;
+  padding: 13px 22px;
+  border-radius: 8px;
+  font-size: .82rem;
+  z-index: 99;
+  animation: slideUp .3s ease both;
+}
+
+.toastShow { display: block; }
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* RESPONSIVO */
+@media (max-width: 720px) {
+  .page { grid-template-columns: 1fr; }
+  .panelLeft { display: none; }
+  .panelRight { padding: 40px 24px; min-height: 100vh; }
+}

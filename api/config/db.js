@@ -1,13 +1,18 @@
-const dns = require('dns');
-dns.setServers(['1.1.1.1', '8.8.8.8']);
-
 const mongoose = require('mongoose');
 
-// credencials
-const dbUser = process.env.DB_USER
-const dbPassword = process.env.DB_PASS  
+const dbUser     = process.env.DB_USER;
+const dbPassword = process.env.DB_PASS;
+const dbName     = 'casa-do-lago'
 
-const connectionString = `mongodb+srv://${dbUser}:${dbPassword}@cluster0.6d3qy1p.mongodb.net/casa-do-lago?retryWrites=true&w=majority`;
+// Validação antecipada — falha rápido se as credenciais não estiverem configuradas
+if (!dbUser || !dbPassword) {
+  console.error('❌ DB_USER ou DB_PASS não definidos. Configure as variáveis de ambiente.');
+  process.exit(1);
+}
+
+// URI de conexão ao cluster MongoDB Atlas
+const connectionString =
+  `mongodb+srv://${dbUser}:${dbPassword}@cluster0.6d3qy1p.mongodb.net/${dbName}?retryWrites=true&w=majority`;
 
 class Database {
   constructor() {
@@ -15,13 +20,20 @@ class Database {
   }
 
   _connect() {
-    mongoose.connect(connectionString)
+    mongoose
+      .connect(connectionString)
       .then(() => {
-        console.log('Database connection successful');
+        console.log(`✅ Conectado ao banco: ${dbName}`);
       })
-      .catch(err => {
-        console.error('Database connection error', err);
+      .catch((err) => {
+        console.error('❌ Erro na conexão com o banco:', err.message);
+        process.exit(1);
       });
+
+    // Log quando a conexão cair (ex: instabilidade de rede)
+    mongoose.connection.on('disconnected', () => {
+      console.warn('⚠️  MongoDB desconectado.');
+    });
   }
 }
 
