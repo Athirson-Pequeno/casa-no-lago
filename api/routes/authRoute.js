@@ -73,7 +73,7 @@ router.post('/login', async (req, res) => {
 
   try {
     const secret = process.env.SECRET;
-    const token  = jwt.sign({ id: user._id }, secret, { expiresIn: '15m' });
+    const token  = jwt.sign({ id: user._id, role: user.role }, secret, { expiresIn: '15m' });
     res.status(200).json({ msg: 'Autenticação realizada com sucesso.', token, expiredAt: 900 });
   } catch (err) {
     console.error(err);
