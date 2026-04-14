@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Navbar from '../components/Navbar.jsx'
-import { api, getUser } from '../lib/api.js'
+import { api, getUser, isTokenValid } from '../lib/api.js'
 import styles from './Home.module.css'
 
 // ── Dados mock (fallback se API offline) ──────────────────────────────────────
@@ -101,25 +101,20 @@ function RoomCard({ quarto, index, onReservar }) {
 
 // ── Modal de reserva ──────────────────────────────────────────────────────────
 function ReservaModal({ quarto, checkinPadrao, checkoutPadrao, onClose, onSuccess }) {
-  const [nome, setNome]       = useState('')
   const [checkin, setCheckin] = useState(checkinPadrao)
   const [checkout, setCheckout] = useState(checkoutPadrao)
   const [loading, setLoading] = useState(false)
-  const { token } = getUser()
   const navigate = useNavigate()
 
   async function confirmar() {
-    if (!nome)     return alert('Informe seu nome.')
     if (!checkin)  return alert('Informe a data de check-in.')
     if (!checkout) return alert('Informe a data de check-out.')
-    if (!token)    return navigate('/login')
+    if (!isTokenValid()) return navigate('/login')
 
     setLoading(true)
     const { ok, data } = await api.post('/reservas', {
       quartoId: quarto._id,
-      nome,
-      checkin,
-      checkout,
+      diaria: { dataInicio: checkin, dataFim: checkout },
     })
     setLoading(false)
 
@@ -141,11 +136,6 @@ function ReservaModal({ quarto, checkinPadrao, checkoutPadrao, onClose, onSucces
       <div className={styles.modal}>
         <h2>{quarto.nome}</h2>
         <p className={styles.modalSub}>R$ {quarto.preco}/noite — confirme os dados abaixo.</p>
-
-        <div className={styles.modalField}>
-          <label>Nome completo</label>
-          <input type="text" placeholder="Seu nome" value={nome} onChange={e => setNome(e.target.value)} />
-        </div>
 
         <div className={styles.modalDates}>
           <div className={styles.modalField}>

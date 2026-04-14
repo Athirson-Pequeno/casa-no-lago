@@ -184,7 +184,7 @@ export default function Login() {
           <div className={styles.divider}>ou</div>
 
           <div className={styles.registerRow}>
-            Não tem conta? <a href="#">Criar conta</a>
+            Não tem conta? <Link to="/register">Criar conta</Link>
           </div>
         </div>
       </div>
