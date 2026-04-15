@@ -1,7 +1,4 @@
 const mongoose = require('mongoose');
-const dns = require('dns');
-
-dns.setServers(['1.1.1.1', '1.0.0.1']);
 
 const dbUser     = process.env.DB_USER;
 const dbPassword = process.env.DB_PASS;
